@@ -10,6 +10,7 @@
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
+#pragma comment(linker, "/entry:WinMainCRTStartup /subsystem:console")
 #endif
 
 
@@ -66,6 +67,9 @@ BEGIN_MESSAGE_MAP(CMfcCImageDlg, CDialogEx)
 	ON_WM_PAINT()
 	ON_WM_QUERYDRAGICON()
 	ON_BN_CLICKED(IDC_BTN_IMAGE, &CMfcCImageDlg::OnBnClickedBtnImage)
+	ON_BN_CLICKED(IDC_BTN_SAVE, &CMfcCImageDlg::OnBnClickedBtnSave)
+	ON_BN_CLICKED(IDC_BTN_LOAD, &CMfcCImageDlg::OnBnClickedBtnLoad)
+	ON_BN_CLICKED(IDC_BTN_ACTION, &CMfcCImageDlg::OnBnClickedBtnAction)
 END_MESSAGE_MAP()
 
 
@@ -158,13 +162,12 @@ HCURSOR CMfcCImageDlg::OnQueryDragIcon()
 
 void CMfcCImageDlg::OnBnClickedBtnImage()
 {
-	// TODO: 여기에 컨트롤 알림 처리기 코드를 추가합니다.
 	int nWidth = 640;
 	int nHeight = 480;
 	//gray level
 	int nBpp = 8;
 
-	m_image.Create(nWidth, nHeight, nBpp);
+	m_image.Create(nWidth, -nHeight, nBpp);
 	if (nBpp == 8)
 	{
 		static RGBQUAD rgb[256];
@@ -178,28 +181,116 @@ void CMfcCImageDlg::OnBnClickedBtnImage()
 	int nPitch = m_image.GetPitch();
 	unsigned char* fm = (unsigned char*)m_image.GetBits();
 
-	for (int j = 0; j < nHeight; j++)
-	{
-		for (int i = 0; i < nWidth; i++)
-		{
-			fm[j * nPitch + i] = (j)%255;
-		}
-	}
+	memset(fm, 0xff, nWidth * nHeight); 
+
+	//for (int j = 0; j < nHeight; j++)
+	//{
+	//	for (int i = 0; i < nWidth; i++)
+	//	{
+	//		fm[j * nPitch + i] = j%0xff;
+	//	}
+	//}
 
 	//fm[0 * nPitch + 0] = 128;
 	//fm[0 * nPitch + 1] = 128;
 	//fm[1 * nPitch + 1] = 128;
 
-	for (int j = 0; j < nHeight/2; j++)
-	{
-		for (int i = 0; i < nWidth/2; i++)
-		{
-			fm[j * nPitch + i] = 200;
-		}
-	}
+	//for (int j = 0; j < nHeight/2; j++)
+	//{
+	//	for (int i = 0; i < nWidth/2; i++)
+	//	{
+	//		fm[j * nPitch + i] = 200;
+	//	}
+	//}
+	
+	//화면에 출력하는 함수
+	UpdateDisplay();
+}
+//g_ : 전역변수
+CString g_strFileImage = _T("C:\\images\\save.bmp");
+void CMfcCImageDlg::OnBnClickedBtnSave()
+{
+	m_image.Save(g_strFileImage);
+}
 
+
+void CMfcCImageDlg::OnBnClickedBtnLoad()
+{
+	if (m_image != NULL)
+	{
+		m_image.Destroy();
+	}
+	m_image.Load(g_strFileImage);
+
+	UpdateDisplay();
+}
+
+
+void CMfcCImageDlg::UpdateDisplay() 
+{
 	CClientDC dc(this);
 	m_image.Draw(dc, 0, 0);
+}
 
-	m_image.Save(_T("C:\\images\\save.bmp"));
+
+void CMfcCImageDlg::MoveRect()
+{
+	static int nSttX = 0;
+	static int nSttY = 0;
+	int nGray = 80;
+	int nWidth = m_image.GetWidth();
+	int nHeight = m_image.GetHeight();
+	int nPitch = m_image.GetPitch();
+	int nRadius = 10;
+	unsigned char* fm = (unsigned char*)m_image.GetBits();
+
+	memset(fm, 0xff, nWidth * nHeight);
+
+
+	DrawCircle(fm, nSttX, nSttY, nRadius, nGray);
+	//for (int j = nSttY; j < nSttY+48; j++)
+	//{
+	//	for (int i = nSttX; i < nSttX+64; i++)
+	//	{
+	//		if(VaildImgPos(i,j))
+	//			fm[j * nPitch + i] = nGray;
+	//	}
+	//}
+	nSttX++;
+	nSttY++;
+	UpdateDisplay();
+}
+
+void CMfcCImageDlg::OnBnClickedBtnAction()
+{
+	for (int i = 0; i < 640; i++)
+	{
+		MoveRect();
+		Sleep(10);
+	}
+}
+
+BOOL CMfcCImageDlg::VaildImgPos(int x, int y)
+{
+	int nWidth = m_image.GetWidth();
+	int nHeight = m_image.GetHeight();
+	CRect rect(0, 0, nWidth, nHeight);
+
+	return rect.PtInRect(CPoint(x, y));
+}
+
+
+void CMfcCImageDlg::DrawCircle(unsigned char* fm, int x, int y, int nRadius, int nGray)
+{
+	int nCentorX = x + nRadius;
+	int nCentorY = y + nRadius;
+	int nPitch = m_image.GetPitch();
+
+	for (int j = y; j < y+nRadius*2; j++)
+	{
+		for (int i = x; i < x+nRadius*2; i++)
+		{
+			fm[j * nPitch + i] = nGray;
+		}
+	}
 }

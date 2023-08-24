@@ -24,6 +24,8 @@ public:
 
 
 // 구현입니다.
+private:
+	BOOL VaildImgPos(int x, int y);
 protected:
 	HICON m_hIcon;
 
@@ -35,4 +37,9 @@ protected:
 	DECLARE_MESSAGE_MAP()
 public:
 	afx_msg void OnBnClickedBtnImage();
+	afx_msg void OnBnClickedBtnSave();
+	afx_msg void OnBnClickedBtnLoad();
+	afx_msg void OnBnClickedBtnAction();
+	void UpdateDisplay();
+	void MoveRect();
 };
