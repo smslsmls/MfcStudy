@@ -7,6 +7,10 @@
 #include "MfcCImage.h"
 #include "MfcCImageDlg.h"
 #include "afxdialogex.h"
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+using namespace std;
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -70,6 +74,7 @@ BEGIN_MESSAGE_MAP(CMfcCImageDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BTN_SAVE, &CMfcCImageDlg::OnBnClickedBtnSave)
 	ON_BN_CLICKED(IDC_BTN_LOAD, &CMfcCImageDlg::OnBnClickedBtnLoad)
 	ON_BN_CLICKED(IDC_BTN_ACTION, &CMfcCImageDlg::OnBnClickedBtnAction)
+	ON_BN_CLICKED(IDC_BTN_RAND, &CMfcCImageDlg::OnBnClickedBtnRand)
 END_MESSAGE_MAP()
 
 
@@ -241,29 +246,23 @@ void CMfcCImageDlg::MoveRect()
 	int nWidth = m_image.GetWidth();
 	int nHeight = m_image.GetHeight();
 	int nPitch = m_image.GetPitch();
-	int nRadius = 10;
+	int nRadius = 20;
 	unsigned char* fm = (unsigned char*)m_image.GetBits();
 
 	memset(fm, 0xff, nWidth * nHeight);
 
+	DrawCircle(fm, nSttX, nSttY, nRadius, 0xff);
+	DrawCircle(fm, ++nSttX, ++nSttY, nRadius, nGray);
 
-	DrawCircle(fm, nSttX, nSttY, nRadius, nGray);
-	//for (int j = nSttY; j < nSttY+48; j++)
-	//{
-	//	for (int i = nSttX; i < nSttX+64; i++)
-	//	{
-	//		if(VaildImgPos(i,j))
-	//			fm[j * nPitch + i] = nGray;
-	//	}
-	//}
-	nSttX++;
-	nSttY++;
 	UpdateDisplay();
+	/*CString strFile;
+	strFile.Format(_T("C:\\images\\image%d.jpg"), nSttX);
+	m_image.Save(strFile);*/
 }
 
 void CMfcCImageDlg::OnBnClickedBtnAction()
 {
-	for (int i = 0; i < 640; i++)
+	for (int i = 0; i < 100; i++)
 	{
 		MoveRect();
 		Sleep(10);
@@ -290,7 +289,48 @@ void CMfcCImageDlg::DrawCircle(unsigned char* fm, int x, int y, int nRadius, int
 	{
 		for (int i = x; i < x+nRadius*2; i++)
 		{
-			fm[j * nPitch + i] = nGray;
+			if (VaildImgPos(i, j))
+			{
+				if (IsInCircle(i, j, nCentorX, nCentorY, nRadius))
+				{
+					fm[j * nPitch + i] = nGray;
+				}
+			}
 		}
 	}
+}
+
+
+bool CMfcCImageDlg::IsInCircle(int i, int j, int nCentorX, int nCentorY, int nRadius)
+{
+	bool bRet = false;
+
+	double dx = i - nCentorX;
+	double dy = j - nCentorY;
+	double dDist = dx * dx + dy * dy;
+
+	if (dDist < nRadius * nRadius)
+	{
+		bRet = true;
+	}
+
+	return bRet;
+}
+
+void CMfcCImageDlg::OnBnClickedBtnRand()
+{
+	int nGray = 80;
+	int nWidth = m_image.GetWidth();
+	int nHeight = m_image.GetHeight();
+	int nPitch = m_image.GetPitch();
+	int nRadius = 20;
+	unsigned char* fm = (unsigned char*)m_image.GetBits();
+
+	memset(fm, 0xff, nWidth * nHeight);
+
+	srand((unsigned int)time(NULL));
+	//DrawCircle(fm, rand() % (nWidth-nRadius*2), rand() % (nHeight - nRadius * 2), nRadius, nGray);
+	DrawCircle(fm, (nWidth-nRadius*2), (nHeight - nRadius * 2), nRadius, nGray);
+
+	UpdateDisplay();
 }

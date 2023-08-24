@@ -42,4 +42,7 @@ public:
 	afx_msg void OnBnClickedBtnAction();
 	void UpdateDisplay();
 	void MoveRect();
+	void DrawCircle(unsigned char* fm, int i, int j, int nRadius, int nGray);
+	bool IsInCircle(int i, int j, int nCentorX, int nCentorY, int nRadius);
+	afx_msg void OnBnClickedBtnRand();
 };
