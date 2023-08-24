@@ -329,8 +329,8 @@ void CMfcCImageDlg::OnBnClickedBtnRand()
 	memset(fm, 0xff, nWidth * nHeight);
 
 	srand((unsigned int)time(NULL));
-	//DrawCircle(fm, rand() % (nWidth-nRadius*2), rand() % (nHeight - nRadius * 2), nRadius, nGray);
-	DrawCircle(fm, (nWidth-nRadius*2), (nHeight - nRadius * 2), nRadius, nGray);
+	DrawCircle(fm, rand() % (nWidth-nRadius*2), rand() % (nHeight - nRadius * 2), nRadius, nGray);
+	//DrawCircle(fm, (nWidth-nRadius*2), (nHeight - nRadius * 2), nRadius, nGray);
 
 	UpdateDisplay();
 }
